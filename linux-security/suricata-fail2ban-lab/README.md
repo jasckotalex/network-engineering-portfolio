@@ -158,7 +158,7 @@ The screenshots below document the setup and observed results. Select a filename
 ## Notes
 
 - My descriptions of alerts and the ban are based on the terminal screenshots I captured.
-- No passwords, usernames, or wordlist contents are included.
+- I did not include the SSH usernames, passwords, or wordlist contents. The terminal screenshots do show the local shell account name `alex` in some prompts.
 - My screenshots show Suricata log output associated with the `-sT`, `-sS`, and `-sV` scans. No alert appeared in `fast.log` during `-sA`. The screenshots do not include Nmap's own scan summaries or port-state results.
 - In this lab, I practiced defensive monitoring and blocking in a two-VM training environment.
 
@@ -166,3 +166,4 @@ The screenshots below document the setup and observed results. Select a filename
 
 - [Nmap Reference Guide: Port Scanning Techniques](https://nmap.org/book/man-port-scanning-techniques.html)
 - [Suricata User Guide](https://docs.suricata.io/)
+
