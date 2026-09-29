@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title description">
+  <title id="title">Suricata and Fail2Ban lab topology</title>
+  <desc id="description">Kali Linux at 192.168.96.132 sends Nmap scans and SSH login tests across the VMware NAT network to Debian at 192.168.96.131. Suricata monitors Debian network traffic and Fail2Ban protects its SSH service.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#526581" />
+    </marker>
+    <style>
+      .title { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #14243a; }
+      .label { font: 600 17px 'Segoe UI', Arial, sans-serif; fill: #14243a; }
+      .small { font: 14px 'Segoe UI', Arial, sans-serif; fill: #46566c; }
+      .box { fill: #ffffff; stroke: #b8c5d6; stroke-width: 2; rx: 18; }
+      .pill { fill: #eef3fa; stroke: #cbd6e4; stroke-width: 1.5; rx: 18; }
+    </style>
+  </defs>
+  <rect width="1200" height="430" rx="20" fill="#f5f8fc" />
+  <text x="600" y="48" text-anchor="middle" class="title">Two-VM security lab · VMware Workstation Pro · NAT</text>
+
+  <rect x="55" y="113" width="305" height="225" class="box" />
+  <text x="207" y="153" text-anchor="middle" class="title">Kali Linux</text>
+  <text x="207" y="185" text-anchor="middle" class="label">192.168.96.132</text>
+  <line x1="95" y1="205" x2="320" y2="205" stroke="#e0e7f0" stroke-width="2" />
+  <text x="207" y="238" text-anchor="middle" class="small">Nmap scans</text>
+  <text x="207" y="263" text-anchor="middle" class="small">Hydra SSH login test</text>
+
+  <rect x="440" y="164" width="320" height="122" class="pill" />
+  <text x="600" y="207" text-anchor="middle" class="label">VMware NAT network</text>
+  <text x="600" y="237" text-anchor="middle" class="small">192.168.96.0/24</text>
+  <line x1="360" y1="225" x2="435" y2="225" stroke="#526581" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="760" y1="225" x2="835" y2="225" stroke="#526581" stroke-width="3" marker-end="url(#arrow)" />
+  <text x="398" y="198" text-anchor="middle" class="small">test traffic</text>
+  <text x="799" y="198" text-anchor="middle" class="small">monitored</text>
+
+  <rect x="840" y="113" width="305" height="225" class="box" />
+  <text x="992" y="153" text-anchor="middle" class="title">Debian</text>
+  <text x="992" y="185" text-anchor="middle" class="label">192.168.96.131 · ens33</text>
+  <line x1="880" y1="205" x2="1105" y2="205" stroke="#e0e7f0" stroke-width="2" />
+  <text x="992" y="238" text-anchor="middle" class="small">Suricata · network monitoring</text>
+  <text x="992" y="263" text-anchor="middle" class="small">OpenSSH · Fail2Ban sshd jail</text>
+
+  <text x="600" y="388" text-anchor="middle" class="small">Suricata alerts and Fail2Ban ban events were reviewed on Debian.</text>
+</svg>
