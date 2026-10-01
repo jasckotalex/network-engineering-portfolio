@@ -2,35 +2,36 @@
 
 ## Objective
 
-Create VLANs on two switches and carry them across one trunk while preserving the existing routed lab.
+Create VLANs on two switches and carry them across one trunk while preserving the existing routed lab. Verify that hosts in the same VLAN can communicate across the trunk and that hosts in different VLANs remain separated until inter-VLAN routing is added.
 
 ## Current topology
 
 ```text
-PC1 ── SW1 Gi0/1       SW1 Gi0/3 ══ trunk ══ SW2 Gi0/0
-         SW1 Gi0/0 ── R1 Gi0/0                SW2 Gi0/1 ── PC3
+PC1 (VLAN 10) ── SW1 Gi0/1       SW1 Gi0/3 ══ trunk ══ SW2 Gi0/0 ── SW2 Gi0/1 ── PC3 (VLAN 20)
+PC5 (VLAN 20) ── SW1 Gi0/2
+                    SW1 Gi0/0 ── R1 Gi0/0
 
 R1 Gi0/2 ── PC2
 R1 Gi0/1 ── R2 Gi0/1
 R2 Gi0/0 ── PC4
 ```
 
-The EVE-NG lab currently uses:
-- SW1 Gi0/3 to SW2 Gi0/0 as the trunk.
-- SW1 Gi0/0 to R1, Gi0/1 to PC1, and Gi0/2 as an access port.
-- SW2 Gi0/1 as the VLAN 10 access port to PC3.
+The lab uses SW1 Gi0/3 to SW2 Gi0/0 as the trunk. PC1 and PC5 connect to SW1; PC3 connects to SW2. SW1 Gi0/0 remains connected to R1 as an access port in VLAN 10.
 
-## VLAN plan
+## VLAN and endpoint plan
 
-| VLAN | Name | Purpose | Status |
-|---|---|---|---|
-| 1 | default | Native/legacy default VLAN; temporarily allowed on trunk to preserve existing behavior during migration | Active |
-| 10 | USERS | Existing user LAN 192.168.10.0/24 | Active; PC1 and PC3 assigned |
-| 20 | SERVERS | Reserved for a later endpoint and segmentation exercise | Created and allowed on trunk; no access ports assigned yet |
+| VLAN | Name | Subnet | Endpoints | Status |
+|---|---|---|---|---|
+| 1 | default | — | Native VLAN on the trunk | Active |
+| 10 | USERS | 192.168.10.0/24 | PC1: 192.168.10.10 | Active |
+| 20 | SERVERS | 192.168.40.0/24 | PC5: 192.168.40.10; PC3: 192.168.40.20 | Active |
+
+VLAN 10 and VLAN 20 are created on both switches. The trunk carries VLANs 1, 10, and 20. PC1's gateway remains 192.168.10.1. PC3 has no gateway configured, so it can communicate only within its directly connected subnet until routing is added.
 
 ## Trunk configuration
 
-SW1 Gi0/3 and SW2 Gi0/0 use 802.1Q trunking. Both are configured to allow VLANs 1, 10, and 20. The trunk output showed:
+SW1 Gi0/3 and SW2 Gi0/0 use 802.1Q trunking. Both are configured to allow VLANs 1, 10, and 20. Verification showed:
+
 - Mode: on
 - Encapsulation: 802.1Q
 - Status: trunking
@@ -43,27 +44,29 @@ The switch image requires trunk encapsulation to be explicitly set to dot1q befo
 ## Access ports
 
 On SW1:
-- Gi0/0, Gi0/1, and Gi0/2 were configured as access ports in VLAN 10.
+- Gi0/0 — access VLAN 10, connected to R1 Gi0/0.
+- Gi0/1 — access VLAN 10, connected to PC1.
+- Gi0/2 — access VLAN 20, connected to PC5.
 
 On SW2:
-- Gi0/1 was configured as an access port in VLAN 10 for PC3.
-- SW2 reported VLAN 10 active with Gi0/1 as a member.
-
-VLAN 20 exists on both switches but is not yet assigned to an access port.
+- Gi0/1 — access VLAN 20, connected to PC3.
 
 ## Verification recorded
 
-- `show interfaces trunk` reports SW1 Gi0/3 and SW2 Gi0/0 trunking with 802.1Q and VLANs 1, 10, and 20 allowed.
-- Both switches report VLANs 1, 10, and 20 in the STP forwarding state.
-- PC1 successfully pinged PC3 at 192.168.10.20 after PC3 was connected through SW2 Gi0/1. Replies had TTL 64, consistent with both hosts communicating in the same subnet without routing.
-- PC1 still successfully pinged PC2 at 192.168.20.10 (TTL 63) and PC4 at 192.168.30.10 (TTL 62), confirming the existing router paths remained operational after moving access ports to VLAN 10.
-- SW2's `write memory` command completed with `[OK]`.
+- `show interfaces trunk` confirmed the SW1 Gi0/3 and SW2 Gi0/0 trunks, dot1q encapsulation, allowed VLANs 1, 10, and 20, and VLANs in the STP forwarding state.
+- PC1 and PC3 successfully communicated when both were temporarily assigned to VLAN 10, confirming VLAN 10 could cross the trunk.
+- After assigning PC3 and PC5 to VLAN 20 and configuring addresses in 192.168.40.0/24, PC3 successfully pinged PC5 at 192.168.40.10 (five replies, TTL 64). This confirms same-VLAN connectivity across the SW2–SW1 trunk.
+- PC3's startup configuration was saved with `save`.
+- PC3's ping to PC1 at 192.168.10.10 returned `No gateway found`. This is expected because PC3 has no default gateway; it confirms that inter-VLAN routing is not currently available, but by itself is not a test of VLAN filtering.
+- Earlier checks showed existing routed reachability between PC1, PC2, and PC4 remained operational during the VLAN 10 setup.
 
-## Current status
+## Result
 
-VLAN 10 connectivity across the trunk and existing routed reachability are verified. Stage 4 is in progress: VLAN 20 still needs an access endpoint and a focused segmentation check. No inter-VLAN routing has been configured.
+Stage 4 is complete: VLAN 10 and VLAN 20 are configured on both switches, both VLANs are allowed across the trunk, access ports place endpoints into their intended VLANs, and the VLAN 20 endpoints communicate across the trunk. Inter-VLAN routing has not been configured and remains a later stage.
 
 ## Commands used
+
+Example trunk configuration (apply the corresponding interface on each switch):
 
 ```cisco
 vlan 10
@@ -75,10 +78,22 @@ interface gigabitEthernet0/3
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk allowed vlan 1,10,20
-!
-interface gigabitEthernet0/0
- switchport mode access
- switchport access vlan 10
 ```
 
-Interface assignments differ by switch as shown above. Do not apply a trunk configuration to an endpoint access port.
+Example access port configuration:
+
+```cisco
+interface gigabitEthernet0/2
+ switchport mode access
+ switchport access vlan 20
+```
+
+Endpoint IP configuration on VPCS:
+
+```text
+PC5> ip 192.168.40.10/24
+PC3> ip 192.168.40.20/24
+PC3> save
+```
+
+Interface assignments differ by switch as shown above. Do not apply trunk configuration to an endpoint access port.
