@@ -92,8 +92,10 @@ These routes provide the return paths through R1. A packet needs a usable route 
 - R2 pinged 192.168.100.1 with 5/5 replies.
 - R1 pinged 192.168.100.2; the first attempt had 4/5 replies, then a repeat had 5/5 replies.
 - PC4 pinged its gateway 192.168.30.1 with 5/5 replies.
-- The supplied routing-table screenshots show R1's static route to 192.168.30.0/24 via 192.168.100.2 and R2's static routes to 192.168.10.0/24 and 192.168.20.0/24 via 192.168.100.1.
-- End-to-end pings between PC4 and the remote hosts have not yet been recorded.
+- Routing-table screenshots show R1's static route to 192.168.30.0/24 via 192.168.100.2 and R2's static routes to 192.168.10.0/24 and 192.168.20.0/24 via 192.168.100.1.
+- PC4 pinged PC1 (192.168.10.10) and PC2 (192.168.20.10) successfully, with five replies to each.
+- PC1 pinged PC4 (192.168.30.10) successfully, with five replies.
+- The supplied screenshots include an earlier “Destination host unreachable” response from PC4's gateway before the successful end-to-end tests.
 
 Static routes are marked `S` in the Cisco routing table. Connected routes appear as `C`, and local interface addresses appear as `L`.
 
@@ -101,13 +103,6 @@ Static routes are marked `S` in the Cisco routing table. Connected routes appear
 
 The screenshots show `write memory` completing successfully on R2 and R1, with `[OK]`. PC4's `save` command also completed with `done`.
 
-## Next verification
+## Status
 
-From PC4, test both existing LANs:
-
-```text
-ping 192.168.10.10
-ping 192.168.20.10
-```
-
-Also test from PC1 or PC2 back to PC4. Record results before marking the stage complete.
+Static routing and end-to-end reachability between PC4 and both existing LANs are verified. Stage 3 is complete.
