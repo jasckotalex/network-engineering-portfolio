@@ -2,18 +2,20 @@
 
 ## Objective
 
-Add a Layer 2 switch to the working routed lab. Put PC1 and a new PC3 in the same subnet, then observe how the switch learns MAC addresses. PC2 remains on the other subnet so the original routed path stays in place.
+Add a Layer 2 switch to the routed lab. PC1 and PC3 share one subnet through SW1; PC2 remains in the other subnet behind R1. This demonstrates both local switching and routed traffic.
 
 ## Topology
 
 ```text
-PC1 ──┐
-      ├── SW1 ─── R1 Gi0/1 (192.168.10.1)
-PC3 ──┘                         R1 Gi0/2 ─── PC2
-                                      192.168.20.0/24
+PC1 ── SW1 Gi0/1
+          │
+PC3 ── SW1 Gi0/2
+          │ Gi0/0
+          R1 Gi0/0 (192.168.10.1/24)
+          R1 Gi0/2 (192.168.20.1/24) ── PC2
 ```
 
-The switch ports shown in the MAC table are Gi0/1 and Gi0/2. Confirm in EVE-NG which host is connected to each port before interpreting the port mapping.
+In the EVE-NG diagram, PC1 and PC3 connect to SW1; SW1 Gi0/0 connects to R1 Gi0/0; R1 Gi0/2 connects to PC2. The router interfaces were adjusted when the topology was changed.
 
 ## Address plan
 
@@ -21,8 +23,9 @@ The switch ports shown in the MAC table are Gi0/1 and Gi0/2. Confirm in EVE-NG w
 |---|---|---|---|
 | PC1 | Ethernet | 192.168.10.10/24 | 192.168.10.1 |
 | PC3 | Ethernet | 192.168.10.20/24 | 192.168.10.1 |
-| R1 | Gi0/1 | 192.168.10.1/24 | — |
+| R1 | Gi0/0 | 192.168.10.1/24 | — |
 | PC2 | Ethernet | 192.168.20.10/24 | 192.168.20.1 |
+| R1 | Gi0/2 | 192.168.20.1/24 | — |
 
 ## PC3 configuration
 
@@ -31,18 +34,15 @@ ip 192.168.10.20/24 192.168.10.1
 save
 ```
 
-## Verification and observed result
+## Verification and observed results
 
-PC3 successfully pinged PC1 at 192.168.10.10. This confirms same-subnet connectivity through SW1.
+- PC3 pinged PC1 at 192.168.10.10 successfully. This verifies same-subnet connectivity through SW1.
+- SW1's `show mac address-table` output showed two dynamically learned MAC addresses in VLAN 1 on Gi0/1 and Gi0/2.
+- After the interface/topology correction, PC3 pinged its gateway 192.168.10.1 successfully.
+- PC3 then pinged PC2 at 192.168.20.10 successfully. Replies had TTL 63, consistent with passing through R1 from the VPCS host's initial TTL.
+- The earlier attempt to ping PC2 reported the gateway as unreachable; the subsequent gateway and PC2 pings succeeded after correcting the topology/interface configuration.
 
-The IOSv switch output from `show mac address-table` showed two dynamically learned entries in VLAN 1:
-
-| MAC address | Port |
-|---|---|
-| 0050.7966.6801 | Gi0/1 |
-| 0050.7966.6805 | Gi0/2 |
-
-The MAC table associates a source MAC with the switch port where its frame was learned. The first ping also causes ARP broadcast traffic, allowing the switch to learn source MAC addresses as frames pass.
+The MAC table maps a learned source MAC address to the switch port where its frame arrived. ARP broadcasts generated during the first ping also let the switch learn host MAC addresses.
 
 ## Commands
 
@@ -57,15 +57,17 @@ On PC3:
 ```text
 show ip
 ping 192.168.10.10
+ping 192.168.10.1
+ping 192.168.20.10
 save
 ```
 
 ## Learning notes
 
-- PC1 and PC3 share the same subnet, so their traffic is switched locally and does not need to be routed by R1.
-- R1 remains the default gateway for traffic leaving 192.168.10.0/24, including traffic to PC2.
-- The switch learned two dynamic MAC entries after traffic was generated.
+- PC1 and PC3 share a subnet, so their traffic is switched locally and does not need routing by R1.
+- Traffic from PC3 to PC2 is sent to the default gateway and routed by R1 between 192.168.10.0/24 and 192.168.20.0/24.
+- The initial failed attempt was resolved by correcting the topology/interface configuration.
 
 ## Status
 
-Same-subnet ping and dynamic MAC learning are verified from the supplied EVE-NG screenshots. PC3's `save` command reported `done`.
+Same-subnet switching, dynamic MAC learning, gateway reachability, and end-to-end routed connectivity from PC3 to PC2 are verified from the supplied screenshots. PC3's configuration was saved.
