@@ -2,43 +2,70 @@
 
 ## Objective
 
-Add one Layer 2 switch and place two hosts in the same IPv4 subnet. Observe how frames are forwarded using learned MAC addresses.
+Add a Layer 2 switch to the working routed lab. Put PC1 and a new PC3 in the same subnet, then observe how the switch learns MAC addresses. PC2 remains on the other subnet so the original routed path stays in place.
 
 ## Topology
 
 ```text
 PC1 ──┐
-      SW1
-PC2 ──┘
+      ├── SW1 ─── R1 Gi0/1 (192.168.10.1)
+PC3 ──┘                         R1 Gi0/2 ─── PC2
+                                      192.168.20.0/24
 ```
 
-Both PCs connect to access ports on SW1. No router is required in this stage.
+The switch ports shown in the MAC table are Gi0/1 and Gi0/2. Confirm in EVE-NG which host is connected to each port before interpreting the port mapping.
 
 ## Address plan
 
-| Node | Example address |
+| Node | Interface | IPv4 address | Default gateway |
+|---|---|---|---|
+| PC1 | Ethernet | 192.168.10.10/24 | 192.168.10.1 |
+| PC3 | Ethernet | 192.168.10.20/24 | 192.168.10.1 |
+| R1 | Gi0/1 | 192.168.10.1/24 | — |
+| PC2 | Ethernet | 192.168.20.10/24 | 192.168.20.1 |
+
+## PC3 configuration
+
+```text
+ip 192.168.10.20/24 192.168.10.1
+save
+```
+
+## Verification and observed result
+
+PC3 successfully pinged PC1 at 192.168.10.10. This confirms same-subnet connectivity through SW1.
+
+The IOSv switch output from `show mac address-table` showed two dynamically learned entries in VLAN 1:
+
+| MAC address | Port |
 |---|---|
-| PC1 | 192.168.10.10/24 |
-| PC2 | 192.168.10.20/24 |
+| 0050.7966.6801 | Gi0/1 |
+| 0050.7966.6805 | Gi0/2 |
 
-Do not configure a default gateway for this same-subnet exercise.
+The MAC table associates a source MAC with the switch port where its frame was learned. The first ping also causes ARP broadcast traffic, allowing the switch to learn source MAC addresses as frames pass.
 
-## Tasks
+## Commands
 
-1. Add SW1 and connect both VPCS nodes to separate switch ports.
-2. Start the nodes and confirm they are in the same subnet.
-3. Ping PC2 from PC1.
-4. Inspect the switch MAC address table before and after generating traffic, using the command supported by the selected switch image (for Cisco IOS, `show mac address-table`).
-5. Clear or wait out dynamic MAC learning, then ping again and observe relearning if the image supports it.
+On SW1:
 
-## Expected result
+```cisco
+show mac address-table
+```
 
-The hosts can communicate within the same subnet. SW1 learns each source MAC address on the port where the frame arrives and uses that table to forward later unicast frames. Initial ARP traffic may be broadcast.
+On PC3:
 
-## Troubleshooting
+```text
+show ip
+ping 192.168.10.10
+save
+```
 
-Check link state, host addresses and masks, VLAN membership, and learned MAC addresses. If the switch image does not support the expected IOS command, use the equivalent command for that image.
+## Learning notes
+
+- PC1 and PC3 share the same subnet, so their traffic is switched locally and does not need to be routed by R1.
+- R1 remains the default gateway for traffic leaving 192.168.10.0/24, including traffic to PC2.
+- The switch learned two dynamic MAC entries after traffic was generated.
 
 ## Status
 
-Planned. Run after Stage 1 is verified and record actual switch output and observations.
+Same-subnet ping and dynamic MAC learning are verified from the supplied EVE-NG screenshots. PC3's `save` command reported `done`.
