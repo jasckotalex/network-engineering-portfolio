@@ -10,16 +10,15 @@ The project is documented as it is built. Each stage records the goal, topology,
 
 ### Current status
 
-- [x] Stage 1 topology and initial R1 interface configuration documented
-- [ ] Add two end hosts and verify routed connectivity
-- [ ] Record command output and troubleshooting evidence
-- [ ] Expand to switching and VLANs
+- [x] Stage 1 — Routed foundation: two LANs communicate through R1
+- [x] Stage 2 — Switching: PC1 and PC3 communicate through SW1; dynamic MAC learning verified
+- [ ] Stage 3 — Static routes configured; end-to-end reachability from PC4 still to verify
 
 ### Lab roadmap
 
-1. [Stage 1 — Routed point-to-point foundation](projects/small-enterprise-network-lab/stages/01-routed-foundation.md)
+1. [Stage 1 — Routed foundation](projects/small-enterprise-network-lab/stages/01-routed-foundation.md)
 2. [Stage 2 — Ethernet switching and MAC learning](projects/small-enterprise-network-lab/stages/02-switching.md)
-3. Stage 3 — Multiple subnets and static routing
+3. [Stage 3 — Multiple subnets and static routing](projects/small-enterprise-network-lab/stages/03-static-routing.md)
 4. Stage 4 — VLANs and 802.1Q trunks
 5. Stage 5 — Inter-VLAN routing, DHCP, and DNS
 6. Stage 6 — Multi-router routing and OSPF
@@ -27,7 +26,7 @@ The project is documented as it is built. Each stage records the goal, topology,
 8. Stage 8 — ACLs, firewall policy, and IDS
 9. Stage 9 — Redundancy and network automation
 
-See the [project overview](projects/small-enterprise-network-lab/README.md) for the design principles and full roadmap.
+See the [project overview](projects/small-enterprise-network-lab/README.md) for design principles and the full roadmap.
 
 ## Repository structure
 
