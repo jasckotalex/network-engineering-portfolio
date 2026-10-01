@@ -12,7 +12,7 @@ The project is documented as it is built. Each stage records the goal, topology,
 
 - [x] Stage 1 — Routed foundation: two LANs communicate through R1
 - [x] Stage 2 — Switching: PC1 and PC3 communicate through SW1; dynamic MAC learning verified
-- [ ] Stage 3 — Static routes configured; end-to-end reachability from PC4 still to verify
+- [x] Stage 3 — Static routing: PC4 reaches both existing LANs, and PC1 reaches PC4
 
 ### Lab roadmap
 
