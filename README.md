@@ -14,6 +14,7 @@ The project is documented as it is built. Each stage records the goal, topology,
 - [x] Stage 2 — Switching: PC1 and PC3 communicate through SW1; dynamic MAC learning verified
 - [x] Stage 3 — Static routing: PC4 reaches both existing LANs, and PC1 reaches PC4
 - [x] Stage 4 — VLANs and 802.1Q trunk: VLAN 10 and VLAN 20 carried across SW1–SW2; same-VLAN endpoints communicate across the trunk
+- [~] Stage 5 — Planning router-on-a-stick for inter-VLAN routing, followed by DHCP and DNS
 
 ### Lab roadmap
 
@@ -21,7 +22,7 @@ The project is documented as it is built. Each stage records the goal, topology,
 2. [Stage 2 — Ethernet switching and MAC learning](projects/small-enterprise-network-lab/stages/02-switching.md)
 3. [Stage 3 — Multiple subnets and static routing](projects/small-enterprise-network-lab/stages/03-static-routing.md)
 4. [Stage 4 — VLANs and 802.1Q trunk](projects/small-enterprise-network-lab/stages/04-vlans-trunk.md)
-5. Stage 5 — Inter-VLAN routing, DHCP, and DNS
+5. [Stage 5 — Inter-VLAN routing, DHCP, and DNS](projects/small-enterprise-network-lab/stages/05-inter-vlan-routing.md)
 6. Stage 6 — Multi-router routing and OSPF
 7. Stage 7 — Linux-based monitoring and syslog
 8. Stage 8 — ACLs, firewall policy, and IDS
