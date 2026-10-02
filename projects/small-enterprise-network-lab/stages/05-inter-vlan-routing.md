@@ -91,11 +91,12 @@ ip route 192.168.40.0 255.255.255.0 192.168.100.1
 - R1 `show ip dhcp pool` listed both pools with zero leases before clients requested addresses.
 - PC1 received `192.168.10.21/24` via DHCP, with gateway `192.168.10.1`, and successfully pinged its gateway.
 - PC3 received `192.168.40.21/24` via DHCP, with gateway `192.168.40.1`, and successfully pinged its gateway.
+- R1 `show ip dhcp binding` confirmed automatic leases for `192.168.10.21` and `192.168.40.21`.
 
 ## Current status
 
-Router-on-a-stick, tested routed reachability, and DHCP assignment in both VLANs are working. Stage 5 remains in progress: save and confirm DHCP client settings and bindings, then add and verify DNS. No DNS service has been set up yet.
+Router-on-a-stick, tested routed reachability, and DHCP assignment in both VLANs are working. Stage 5 remains in progress: configure and verify DNS. No DNS service has been set up yet.
 
 ## Next work
 
-Save the VPCS DHCP configuration on PC1 and PC3 if not already saved. On R1, verify leases with `show ip dhcp binding`. Then select a service host and configure DNS.
+Confirm that PC1 and PC3 startup configurations are saved with DHCP enabled. Then select a service host and configure DNS.
