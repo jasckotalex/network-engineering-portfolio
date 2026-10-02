@@ -64,11 +64,12 @@ ip route 192.168.40.0 255.255.255.0 192.168.100.1
 - After configuring the VLAN 20 endpoints' default gateways, the user confirmed that cross-VLAN pings succeeded. This verifies inter-VLAN routing between VLANs 10 and 20.
 - A ping from PC3 to PC4 (`192.168.30.10`) initially timed out. R2's `show ip route 192.168.40.0` reported that the network was not in the table.
 - After adding the R2 static route for `192.168.40.0/24` via `192.168.100.1`, the user confirmed the ping from PC3 to PC4 succeeded.
+- The user also confirmed that PC3 can ping PC2 at `192.168.20.10`.
 
 ## Current status
 
-Router-on-a-stick, inter-VLAN connectivity, and reachability from VLAN 20 to PC4 are verified. Stage 5 remains in progress: verify any remaining paths to PC2, then add and test DHCP and DNS. No DHCP or DNS configuration has been added yet.
+Router-on-a-stick and the tested paths from VLAN 20 to PC1, PC2, PC4, and PC5 are working. Stage 5 remains in progress: DHCP and DNS are not configured yet.
 
 ## Next work
 
-Continue with DHCP address assignment for VLANs 10 and 20. Add and test DNS after selecting a suitable service host for the lab.
+Before configuring DHCP, inspect R1 for any existing DHCP pools and exclusions. Then configure and test address assignment for VLANs 10 and 20. Add and test DNS after selecting a suitable service host for the lab.
