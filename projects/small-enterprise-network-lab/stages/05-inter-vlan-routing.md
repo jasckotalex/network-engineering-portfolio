@@ -21,11 +21,14 @@ R2 Gi0/0 ↔ PC4 on 192.168.30.0/24
 | 10 | USERS | 192.168.10.0/24 | Gi0/0.10 — 192.168.10.1/24 |
 | 20 | SERVERS | 192.168.40.0/24 | Gi0/0.20 — 192.168.40.1/24 |
 
-The PC addresses are PC1 `192.168.10.10/24`, PC3 `192.168.40.20/24`, and PC5 `192.168.40.10/24`. PC3 and PC5 use `192.168.40.1` as their default gateway.
+Current endpoint addressing:
+- PC1 uses DHCP and received `192.168.10.21/24`, gateway `192.168.10.1`.
+- PC3 uses DHCP and received `192.168.40.21/24`, gateway `192.168.40.1`.
+- PC5 remains static at `192.168.40.10/24`, gateway `192.168.40.1`.
 
 ## Router-on-a-stick configuration
 
-R1's physical Gi0/0 no longer has an IP address. VLAN gateway addresses are on dot1Q subinterfaces:
+R1's physical Gi0/0 has no IP address. VLAN gateway addresses are on dot1Q subinterfaces:
 
 ```cisco
 interface gigabitEthernet0/0
@@ -43,6 +46,25 @@ interface gigabitEthernet0/0.20
 
 SW1 Gi0/0, connected to R1, is an 802.1Q trunk allowing VLANs 10 and 20. SW1 Gi0/3 to SW2 Gi0/0 remains a trunk allowing VLANs 1, 10, and 20.
 
+## DHCP configuration
+
+R1 excludes .1 through .20 in each LAN so gateway addresses and existing static assignments remain reserved. It provides two DHCP pools:
+
+```cisco
+ip dhcp excluded-address 192.168.10.1 192.168.10.20
+ip dhcp excluded-address 192.168.40.1 192.168.40.20
+!
+ip dhcp pool VLAN10-USERS
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+!
+ip dhcp pool VLAN20-SERVERS
+ network 192.168.40.0 255.255.255.0
+ default-router 192.168.40.1
+```
+
+No DNS server option has been configured in the pools yet.
+
 ## Work completed
 
 1. Inspected the current SW1 Gi0/0 access configuration and R1 Gi0/0 IP before making changes.
@@ -56,20 +78,24 @@ SW1 Gi0/0, connected to R1, is an 802.1Q trunk allowing VLANs 10 and 20. SW1 Gi0
 ip route 192.168.40.0 255.255.255.0 192.168.100.1
 ```
 
+7. Configured DHCP pools for VLANs 10 and 20 on R1, with excluded address ranges for gateways and static hosts.
+
 ## Verification recorded
 
 - R1 `show ip interface brief` showed Gi0/0.10 at `192.168.10.1` and Gi0/0.20 at `192.168.40.1`; both subinterfaces were `up/up`.
 - SW1 `show interfaces trunk` showed Gi0/0 and Gi0/3 trunking with 802.1Q encapsulation. Gi0/0 carried VLANs 10 and 20; Gi0/3 carried VLANs 1, 10, and 20. The allowed VLANs were active and in STP forwarding state.
 - The user confirmed that PC1, PC3, and PC5 could ping their respective R1 gateways.
 - After configuring the VLAN 20 endpoints' default gateways, the user confirmed that cross-VLAN pings succeeded. This verifies inter-VLAN routing between VLANs 10 and 20.
-- A ping from PC3 to PC4 (`192.168.30.10`) initially timed out. R2's `show ip route 192.168.40.0` reported that the network was not in the table.
-- After adding the R2 static route for `192.168.40.0/24` via `192.168.100.1`, the user confirmed the ping from PC3 to PC4 succeeded.
+- A ping from PC3 to PC4 (`192.168.30.10`) initially timed out. R2's `show ip route 192.168.40.0` reported that the network was not in the table. After adding the R2 static route for `192.168.40.0/24` via `192.168.100.1`, the user confirmed the ping from PC3 to PC4 succeeded.
 - The user also confirmed that PC3 can ping PC2 at `192.168.20.10`.
+- R1 `show ip dhcp pool` listed both pools with zero leases before clients requested addresses.
+- PC1 received `192.168.10.21/24` via DHCP, with gateway `192.168.10.1`, and successfully pinged its gateway.
+- PC3 received `192.168.40.21/24` via DHCP, with gateway `192.168.40.1`, and successfully pinged its gateway.
 
 ## Current status
 
-Router-on-a-stick and the tested paths from VLAN 20 to PC1, PC2, PC4, and PC5 are working. Stage 5 remains in progress: DHCP and DNS are not configured yet.
+Router-on-a-stick, tested routed reachability, and DHCP assignment in both VLANs are working. Stage 5 remains in progress: save and confirm DHCP client settings and bindings, then add and verify DNS. No DNS service has been set up yet.
 
 ## Next work
 
-Before configuring DHCP, inspect R1 for any existing DHCP pools and exclusions. Then configure and test address assignment for VLANs 10 and 20. Add and test DNS after selecting a suitable service host for the lab.
+Save the VPCS DHCP configuration on PC1 and PC3 if not already saved. On R1, verify leases with `show ip dhcp binding`. Then select a service host and configure DNS.
