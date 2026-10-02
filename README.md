@@ -14,7 +14,7 @@ The project is documented as it is built. Each stage records the goal, topology,
 - [x] Stage 2 — Switching: PC1 and PC3 communicate through SW1; dynamic MAC learning verified
 - [x] Stage 3 — Static routing: PC4 reaches both existing LANs, and PC1 reaches PC4
 - [x] Stage 4 — VLANs and 802.1Q trunk: VLAN 10 and VLAN 20 carried across SW1–SW2; same-VLAN endpoints communicate across the trunk
-- [~] Stage 5 — Router-on-a-stick and inter-VLAN routing verified; DHCP, DNS, and extended reachability checks remain
+- [~] Stage 5 — Router-on-a-stick and inter-VLAN routing verified; PC3 reaches PC4 via a new R2 static route; DHCP and DNS remain
 
 ### Lab roadmap
 
