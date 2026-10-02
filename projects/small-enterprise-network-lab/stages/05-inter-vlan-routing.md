@@ -50,25 +50,25 @@ SW1 Gi0/0, connected to R1, is an 802.1Q trunk allowing VLANs 10 and 20. SW1 Gi0
 3. Added R1 subinterfaces for VLAN 10 and VLAN 20, keeping the VLAN 10 gateway address unchanged.
 4. Changed SW1 Gi0/0 from access VLAN 10 to an 802.1Q trunk carrying VLANs 10 and 20.
 5. Set the VLAN 20 default gateway on PC3 and PC5.
+6. Added a static route on R2 for the VLAN 20 network via R1 after troubleshooting showed the network was missing from R2's routing table:
+
+```cisco
+ip route 192.168.40.0 255.255.255.0 192.168.100.1
+```
 
 ## Verification recorded
 
 - R1 `show ip interface brief` showed Gi0/0.10 at `192.168.10.1` and Gi0/0.20 at `192.168.40.1`; both subinterfaces were `up/up`.
 - SW1 `show interfaces trunk` showed Gi0/0 and Gi0/3 trunking with 802.1Q encapsulation. Gi0/0 carried VLANs 10 and 20; Gi0/3 carried VLANs 1, 10, and 20. The allowed VLANs were active and in STP forwarding state.
 - The user confirmed that PC1, PC3, and PC5 could ping their respective R1 gateways.
-- After configuring the VLAN 20 endpoints' default gateways, the user confirmed that the previously failing cross-VLAN pings now succeeded. This verifies inter-VLAN routing between VLANs 10 and 20.
-- Reachability from VLAN 20 to PC4 on 192.168.30.0/24 remains to be checked. R2 may need a static route for 192.168.40.0/24 via R1 at 192.168.100.1.
+- After configuring the VLAN 20 endpoints' default gateways, the user confirmed that cross-VLAN pings succeeded. This verifies inter-VLAN routing between VLANs 10 and 20.
+- A ping from PC3 to PC4 (`192.168.30.10`) initially timed out. R2's `show ip route 192.168.40.0` reported that the network was not in the table.
+- After adding the R2 static route for `192.168.40.0/24` via `192.168.100.1`, the user confirmed the ping from PC3 to PC4 succeeded.
 
 ## Current status
 
-Router-on-a-stick and inter-VLAN connectivity between VLAN 10 and VLAN 20 are working. Stage 5 remains in progress: verify reachability to PC2/PC4, then add and test DHCP and DNS. No DHCP or DNS configuration has been added yet.
+Router-on-a-stick, inter-VLAN connectivity, and reachability from VLAN 20 to PC4 are verified. Stage 5 remains in progress: verify any remaining paths to PC2, then add and test DHCP and DNS. No DHCP or DNS configuration has been added yet.
 
-## Next verification
+## Next work
 
-From PC3, test the remote PC4 address:
-
-```text
-PC3> ping 192.168.30.10
-```
-
-If this fails, inspect R2's routing table. R2 must know that `192.168.40.0/24` is reachable through R1 at `192.168.100.1`. Do not add a route until checking whether one is already present.
+Continue with DHCP address assignment for VLANs 10 and 20. Add and test DNS after selecting a suitable service host for the lab.
